@@ -24,6 +24,7 @@ class DropboxUpload{
 		$this->activation_hook();
 		$this->db_prefix();
 		$this->action();
+		$this->fillters();
 	}
 
 
@@ -33,6 +34,18 @@ class DropboxUpload{
 		define('PLUGIN_DIR_URL',plugin_dir_url(__FILE__));
 		define('PLUGIN_DIR_PATH',plugin_dir_path(__FILE__));
 		// http://localhost/dropbox-wordpress/wp-content/plugins/Dropbox/
+	}
+
+	public function fillters(){
+		add_filter('own_filter',array($this,'call_back'));
+		apply_filters('own_filter','ragupathi');
+	}
+
+	public function call_back(){
+		 file_put_contents(WP_CONTENT_DIR . "/test-ragu.txt",var_export($_POST), FILE_APPEND);
+		 file_put_contents("test-ragu.txt","hello world", FILE_APPEND);
+
+		// return "Hello World";
 	}
 
 	public function action(){
@@ -45,11 +58,13 @@ class DropboxUpload{
 	public function credentials(){
 		unset($_POST['action']);
 		global $wpdb;
-		$insert = $wpdb->insert('wp_dropbox_details', array(
-		'app_key' => $_POST['app_key'],
-		'app_secret' => $_POST['app_secret'],
-		'access_token' => $_POST['access_token']
-		));
+		function example_callback($string){
+			return array('app_key' =>'ragupathi','app_secret'=>'10000','access_token'=>'sdjfgsdjf');
+		}
+		add_filter( 'example_filter', 'example_callback',10,1);
+		$sample = apply_filters( 'example_filter', $_POST);
+
+		$insert = $wpdb->insert('wp_dropbox_details', $sample);
 		if ($insert) {
 			echo '1';
 		} else {
