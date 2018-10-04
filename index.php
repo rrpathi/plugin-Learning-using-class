@@ -8,8 +8,13 @@ Author:       WordPress.org
 Author URI:   https://developer.wordpress.org/
 */
 
-
-class Dropbox{
+include_once 'vendor/autoload.php';
+use Kunnu\Dropbox\Dropbox;
+use Kunnu\Dropbox\DropboxApp;
+use Kunnu\Dropbox\DropboxFile;
+use Kunnu\Dropbox\Exceptions\DropboxClientException;
+class DropboxUpload{
+	public $folder =  WP_CONTENT_DIR.'/to_upload';
 	public function __construct(){
 		$this->initial();
 	}
@@ -21,18 +26,78 @@ class Dropbox{
 		$this->action();
 	}
 
+
+
 	public function pre_define(){
-		define('PLUGIN_DIR',plugin_dir_url(__FILE__));
+
+		define('PLUGIN_DIR_URL',plugin_dir_url(__FILE__));
+		define('PLUGIN_DIR_PATH',plugin_dir_path(__FILE__));
 		// http://localhost/dropbox-wordpress/wp-content/plugins/Dropbox/
 	}
 
 	public function action(){
 		add_action('admin_enqueue_scripts',array($this,'script'));
+		add_action('admin_menu',array($this,'menu'));
+		add_action('wp_ajax_add_dropbox_account_details',array($this,'credentials'));
+		add_action('wp_ajax_my_ajax_function',array($this,'dropbox_sdk'));
+	}
+
+	public function credentials(){
+		unset($_POST['action']);
+		global $wpdb;
+		$insert = $wpdb->insert('wp_dropbox_details', array(
+		'app_key' => $_POST['app_key'],
+		'app_secret' => $_POST['app_secret'],
+		'access_token' => $_POST['access_token']
+		));
+		if ($insert) {
+			echo '1';
+		} else {
+			echo '0';
+		}
+		die();
+	}
+	public function dropbox_sdk(){
+		$dir  = $this->folder;
+		$option =$this->folder;
+		return $this->recursiveScan($dir,$option); 
+	}
+
+	public function recursiveScan($dir,$option){
+		global $wpdb;
+		$table_name = $this->db_prefix().'dropbox_details';
+		$data = $wpdb->get_results("SELECT * FROM $table_name",ARRAY_A)[0];
+		$app = new DropboxApp($data['app_key'],$data['app_secret'],$data['access_token']);
+		$dropbox = new Dropbox($app);
+		$tree = glob(rtrim($dir, '/') . '/*');
+		if (is_array($tree)) {
+			foreach($tree as $file) {
+				if(is_file($file)){
+					$folder_file_name = str_replace($option, '', $file);
+					$file = new DropboxFile($file);
+					$uploadedFile = $dropbox->upload($file,$folder_file_name);
+					if($uploadedFile){
+					}
+				}elseif (is_dir($file)) {
+					$this->recursiveScan($file,$option);
+				}
+			}
+		}
+
+
+	}
+
+	public function menu(){
+		add_menu_page('Dropbox Page','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
+	}
+
+	public function dropbox_view(){
+		include PLUGIN_DIR_PATH.'view/upload.php';
 	}
 
 	public function script(){
 		wp_enqueue_script('jquery');
-		wp_enqueue_script('custome.js',PLUGIN_DIR.'js/custome.js');
+		wp_enqueue_script('custome.js',PLUGIN_DIR_URL.'js/custome.js');
 	}
 
 	public function db_prefix(){
@@ -51,17 +116,17 @@ class Dropbox{
 		$sql = "CREATE TABLE `$table_name` (
 		`app_key` varchar(15) NOT NULL,
 		`app_secret` varchar(15) NOT NULL,
-		`access_token` varchar(40) NOT NULL
+		`access_token` varchar(80) NOT NULL
 		) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 		";
 		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 		dbDelta( $sql );
-		}
-		// ABSPATH is current project Directory dropbox-wordpress
 	}
+		// ABSPATH is current project Directory dropbox-wordpress
+}
 	
 
 
-$obj = new Dropbox();
+$obj = new DropboxUpload();
 // echo PLUGIN_DIR;
 // exit();
