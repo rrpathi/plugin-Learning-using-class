@@ -25,8 +25,14 @@ class DropboxUpload{
 		$this->db_prefix();
 		$this->action();
 		$this->fillters();
+		$this->check_filter();
 	}
 
+	public function check_filter(){
+		if(has_filter('own_filter',array($this,'ragupathi'))){
+			echo "ok";
+		}
+	}
 
 
 	public function pre_define(){
@@ -53,13 +59,22 @@ class DropboxUpload{
 		add_action('admin_menu',array($this,'menu'));
 		add_action('wp_ajax_add_dropbox_account_details',array($this,'credentials'));
 		add_action('wp_ajax_my_ajax_function',array($this,'dropbox_sdk'));
+		add_shortcode('form',array($this,'form_creation'));
 	}
+
+	public function form_creation(){ ?>
+		<form>
+		First name: <input type="text" name="firstname"><br>
+		Last name: <input type="text" name="lastname"><br>
+		Message: <textarea name="message"> Enter text here...</textarea>
+		</form>
+	<?php } 
 
 	public function credentials(){
 		unset($_POST['action']);
 		global $wpdb;
 		function example_callback($string){
-			return array('app_key' =>'ragupathi','app_secret'=>'10000','access_token'=>'sdjfgsdjf');
+			return array('app_key' =>'2qc3n2l4gqwb7uc','app_secret'=>'v7k9uce68lf85ch','access_token'=>'pUmE_WvIvEAAAAAAAAABHrijcymlbi0ed8vh5m3U5ua9pQhgGVVLkv23YlZAvDeD');
 		}
 		add_filter( 'example_filter', 'example_callback',10,1);
 		$sample = apply_filters( 'example_filter', $_POST);
@@ -103,7 +118,13 @@ class DropboxUpload{
 	}
 
 	public function menu(){
-		add_menu_page('Dropbox Page','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
+		add_menu_page('Dropbox Page','Dropbox Upload','manage_options','dropbox_view');
+		add_submenu_page('dropbox_view','File Upload','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
+		add_submenu_page('dropbox_view','Create Form','Add New Form','manage_options','create-form',array($this,'custome_form'));
+	}
+
+	public function custome_form(){
+		include PLUGIN_DIR_PATH.'view/custome_form.php';
 	}
 
 	public function dropbox_view(){
@@ -113,6 +134,7 @@ class DropboxUpload{
 	public function script(){
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('custome.js',PLUGIN_DIR_URL.'js/custome.js');
+		wp_enqueue_script('form-js',PLUGIN_DIR_URL.'js/form.js');
 	}
 
 	public function db_prefix(){
