@@ -18,7 +18,6 @@ class DropboxUpload{
 	public function __construct(){
 		$this->initial();
 	}
-
 	public function initial(){
 		$this->pre_define();
 		$this->activation_hook();
@@ -27,33 +26,25 @@ class DropboxUpload{
 		$this->fillters();
 		$this->check_filter();
 	}
-
 	public function check_filter(){
 		if(has_filter('own_filter',array($this,'ragupathi'))){
 			echo "ok";
 		}
 	}
-
-
 	public function pre_define(){
-
 		define('PLUGIN_DIR_URL',plugin_dir_url(__FILE__));
 		define('PLUGIN_DIR_PATH',plugin_dir_path(__FILE__));
 		// http://localhost/dropbox-wordpress/wp-content/plugins/Dropbox/
 	}
-
 	public function fillters(){
 		add_filter('own_filter',array($this,'call_back'));
 		apply_filters('own_filter','ragupathi');
 	}
-
 	public function call_back(){
 		 file_put_contents(WP_CONTENT_DIR . "/test-ragu.txt",var_export($_POST), FILE_APPEND);
 		 file_put_contents("test-ragu.txt","hello world", FILE_APPEND);
-
 		// return "Hello World";
 	}
-
 	public function action(){
 		add_action('admin_enqueue_scripts',array($this,'script'));
 		add_action('admin_menu',array($this,'menu'));
@@ -61,7 +52,6 @@ class DropboxUpload{
 		add_action('wp_ajax_my_ajax_function',array($this,'dropbox_sdk'));
 		add_shortcode('form',array($this,'form_creation'));
 	}
-
 	public function form_creation(){ ?>
 		<form>
 		First name: <input type="text" name="firstname"><br>
@@ -69,7 +59,6 @@ class DropboxUpload{
 		Message: <textarea name="message"> Enter text here...</textarea>
 		</form>
 	<?php } 
-
 	public function credentials(){
 		unset($_POST['action']);
 		global $wpdb;
@@ -78,7 +67,6 @@ class DropboxUpload{
 		}
 		add_filter( 'example_filter', 'example_callback',10,1);
 		$sample = apply_filters( 'example_filter', $_POST);
-
 		$insert = $wpdb->insert('wp_dropbox_details', $sample);
 		if ($insert) {
 			echo '1';
@@ -92,7 +80,6 @@ class DropboxUpload{
 		$option =$this->folder;
 		return $this->recursiveScan($dir,$option); 
 	}
-
 	public function recursiveScan($dir,$option){
 		global $wpdb;
 		$table_name = $this->db_prefix().'dropbox_details';
@@ -113,41 +100,32 @@ class DropboxUpload{
 				}
 			}
 		}
-
-
 	}
-
 	public function menu(){
 		add_menu_page('Dropbox Page','Dropbox Upload','manage_options','dropbox_view');
 		add_submenu_page('dropbox_view','File Upload','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
 		add_submenu_page('dropbox_view','Create Form','Add New Form','manage_options','create-form',array($this,'custome_form'));
 	}
-
 	public function custome_form(){
 		include PLUGIN_DIR_PATH.'view/custome_form.php';
 	}
-
 	public function dropbox_view(){
 		include PLUGIN_DIR_PATH.'view/upload.php';
 	}
-
 	public function script(){
 		wp_enqueue_script('jquery');
 		wp_enqueue_script('custome.js',PLUGIN_DIR_URL.'js/custome.js');
 		wp_enqueue_script('form-js',PLUGIN_DIR_URL.'js/form.js');
 	}
-
 	public function db_prefix(){
 		global $wpdb;
 		$this->wpdb = $wpdb;
 		return $this->wpdb->prefix;
 	}
-
 	public function activation_hook(){
 		register_activation_hook(__FILE__,array($this,'activation_table'));
 		// __FILE__  current file location (index.php)
 	}
-
 	public function activation_table(){
 		$table_name  = $this->db_prefix."dropbox_details1";
 		$sql = "CREATE TABLE `$table_name` (
@@ -162,8 +140,22 @@ class DropboxUpload{
 		// ABSPATH is current project Directory dropbox-wordpress
 }
 	
-
-
 $obj = new DropboxUpload();
-// echo PLUGIN_DIR;
-// exit();
+
+// function callback($value){
+// 	foreach ($value as $key => $value) {
+// 	$shortcode[$value['form_id']] = $value['string'];
+// }
+// 	return $shortcode;
+// }
+
+// add_filter('own-filter','callback',10,1);
+// global $wpdb;
+// $value =  $wpdb->get_results("SELECT * FROM wp_custome_form ",ARRAY_A);
+// $apply_filter = apply_filters('own-filter',$value);
+// foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
+// 	add_shortcode($shortcode_name,function() use ($shortcode_value){
+// 		echo $shortcode_value;
+// 	});
+// }
+
