@@ -142,20 +142,20 @@ class DropboxUpload{
 	
 $obj = new DropboxUpload();
 
-// function callback($value){
-// 	foreach ($value as $key => $value) {
-// 	$shortcode[$value['form_id']] = $value['string'];
-// }
-// 	return $shortcode;
-// }
+function callback($value){
+	foreach ($value as $key => $value) {
+	$shortcode[$value['form_id']] = $value['string'];
+}
+	return $shortcode;
+}
 
-// add_filter('own-filter','callback',10,1);
-// global $wpdb;
-// $value =  $wpdb->get_results("SELECT * FROM wp_custome_form ",ARRAY_A);
-// $apply_filter = apply_filters('own-filter',$value);
-// foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
-// 	add_shortcode($shortcode_name,function() use ($shortcode_value){
-// 		echo $shortcode_value;
-// 	});
-// }
+add_filter('own-filter','callback',10,1);
+global $wpdb;
+$value =  $wpdb->get_results("SELECT * FROM wp_custome_form ",ARRAY_A);
+$apply_filter = apply_filters('own-filter',$value);
+foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
+	add_shortcode($shortcode_name,function() use ($shortcode_value){
+		echo $shortcode_value;
+	});
+}
 
