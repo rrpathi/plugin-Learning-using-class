@@ -10,29 +10,18 @@
         }
     ],
     "require": {
-        "php": "^7.1.3",
-        "symfony/var-dumper": ">=3.4 <5"
+        "php": ">=5.6.4"
     },
     "require-dev": {
-        "mockery/mockery": "^1.0",
-        "phpunit/phpunit": "^7.0",
-        "nesbot/carbon": "^1.26.3"
+        "mockery/mockery": "^0.9.7",
+        "phpunit/phpunit": "^5.7"
     },
     "autoload": {
         "files": [
-            "src/Collect/Support/helpers.php",
-            "src/Collect/Support/alias.php"
+            "src/Illuminate/Support/helpers.php"
         ],
         "psr-4": {
-            "Tightenco\\Collect\\": "src/Collect"
+            "Illuminate\\": "src/Illuminate"
         }
-    },
-    "scripts": {
-        "test": [
-            "@composer install",
-            "phpunit"
-        ]
-    },
-    "minimum-stability": "dev",
-    "prefer-stable": true
+    }
 }
