@@ -23,14 +23,13 @@ class DropboxUpload{
 		$this->activation_hook();
 		$this->db_prefix();
 		$this->action();
+		$this->apply_filter();
 	}
-	
 	public function pre_define(){
 		define('PLUGIN_DIR_URL',plugin_dir_url(__FILE__));
 		define('PLUGIN_DIR_PATH',plugin_dir_path(__FILE__));
 		// http://localhost/dropbox-wordpress/wp-content/plugins/Dropbox/
 	}
-	
 	public function call_back(){
 		 file_put_contents(WP_CONTENT_DIR . "/test-ragu.txt",var_export($_POST), FILE_APPEND);
 		 file_put_contents("test-ragu.txt","hello world", FILE_APPEND);
@@ -41,31 +40,8 @@ class DropboxUpload{
 		add_action('admin_menu',array($this,'menu'));
 		add_action('wp_ajax_add_dropbox_account_details',array($this,'credentials'));
 		add_action('wp_ajax_my_ajax_function',array($this,'dropbox_sdk'));
+		add_filter('shot-code',array($this,'shot_code_callback'),10,1);
 	}
-	
-	
-
-// 	function shot_code_callback($value){
-// 	foreach ($value as $key => $value) {
-// 	$shortcode[$value['form_id']] = $value['string'];
-// }
-// 	return $shortcode;
-// }
-
-// add_filter('shot-code','shot_code_callback',10,1);
-// global $wpdb;
-// $value =  $wpdb->get_results("SELECT * FROM wp_custome_form ",ARRAY_A);
-// $apply_filter = apply_filters('shot-code',$value);
-// foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
-// 	add_shortcode($shortcode_name,function() use ($shortcode_value){
-// 		echo $shortcode_value;
-// 	});
-// }
-
-
-
-
-
 	public function credentials(){
 		unset($_POST['action']);
 		global $wpdb;
@@ -109,9 +85,9 @@ class DropboxUpload{
 		}
 	}
 	public function menu(){
-		add_menu_page('Dropbox Page','Dropbox Upload','manage_options','dropbox_view');
-		add_submenu_page('dropbox_view','File Upload','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
-		add_submenu_page('dropbox_view','Create Form','Add New Form','manage_options','create-form',array($this,'custome_form'));
+	add_menu_page('Dropbox Page','Dropbox Upload','manage_options','dropbox_view');
+	add_submenu_page('dropbox_view','File Upload','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
+	add_submenu_page('dropbox_view','Create Form','Add New Form','manage_options','create-form',array($this,'custome_form'));
 	}
 	public function custome_form(){
 		include PLUGIN_DIR_PATH.'view/custome_form.php';
@@ -129,6 +105,25 @@ class DropboxUpload{
 		$this->wpdb = $wpdb;
 		return $this->wpdb->prefix;
 	}
+
+	public function shot_code_callback($value){
+		foreach ($value as $key => $value) {
+			$shortcode[$value['form_id']] = $value['string'];
+		}
+		return $shortcode;
+	}
+	public function apply_filter(){
+		global $wpdb;
+		$value =  $wpdb->get_results("SELECT * FROM wp_custome_form ",ARRAY_A);
+		$apply_filter = apply_filters('shot-code',$value);
+		foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
+			add_shortcode($shortcode_name,function() use ($shortcode_value){
+				echo $shortcode_value;
+			});
+		}
+	}
+
+
 	public function activation_hook(){
 		register_activation_hook(__FILE__,array($this,'activation_table'));
 		// __FILE__  current file location (index.php)
@@ -146,23 +141,4 @@ class DropboxUpload{
 	}
 		// ABSPATH is current project Directory dropbox-wordpress
 }
-	
 $obj = new DropboxUpload();
-
-// function shot_code_callback($value){
-// 	foreach ($value as $key => $value) {
-// 	$shortcode[$value['form_id']] = $value['string'];
-// }
-// 	return $shortcode;
-// }
-
-// add_filter('shot-code','shot_code_callback',10,1);
-// global $wpdb;
-// $value =  $wpdb->get_results("SELECT * FROM wp_custome_form ",ARRAY_A);
-// $apply_filter = apply_filters('shot-code',$value);
-// foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
-// 	add_shortcode($shortcode_name,function() use ($shortcode_value){
-// 		echo $shortcode_value;
-// 	});
-// }
-
