@@ -84,11 +84,8 @@ class DropboxUpload{
 		 	}
 		 }
 		 
-		 $form_array = array_combine($newlabel_value,$newfield_value);
-		 foreach ($form_array as $key => $value) {
-		 	$result .= "$key:<input type='".$value."' name='".$key."'><br>";
-		 }
-		 $column_values = array('form_id'=>$shortcode_name,'string'=>$result);
+		 $form_array = serialize(array_combine($newlabel_value,$newfield_value));
+		 $column_values = array('form_id'=>$shortcode_name,'string'=>$form_array);
 		 $shotcode = $wpdb->insert('wp_custome_form',$column_values);
 		 if($shotcode){
 		 	echo "1";
@@ -142,7 +139,7 @@ class DropboxUpload{
 
 	public function shot_code_callback($value){
 		foreach ($value as $key => $value) {
-			$shortcode[$value['form_id']] = $value['string'];
+			$shortcode[$value['form_id']] = unserialize($value['string']);
 		}
 		return $shortcode;
 	}
@@ -153,7 +150,9 @@ class DropboxUpload{
 		$apply_filter = apply_filters('shot-code',$value);
 		foreach ($apply_filter as  $shortcode_name => $shortcode_value) {
 			add_shortcode($shortcode_name,function() use ($shortcode_value){
-				echo $shortcode_value;
+				foreach($shortcode_value as $key =>$value){
+					echo "$key:<input type='text' value='".$value."'><br>";
+				}
 			});
 		}
 	}
