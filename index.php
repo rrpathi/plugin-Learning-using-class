@@ -42,7 +42,17 @@ class DropboxUpload{
 		add_action('wp_ajax_add_dropbox_account_details',array($this,'credentials'));
 		add_action('wp_ajax_my_ajax_function',array($this,'dropbox_sdk'));
 		add_action('wp_ajax_shot_code_register',array($this,'add_new_shotcode'));
+		add_action('wp_ajax_edit_short_code',array($this,'edit_short_code'));
 		add_filter('shot-code',array($this,'shot_code_callback'),10,1);
+	}
+
+	public function edit_short_code(){
+		global $wpdb;
+		$table_name = $this->db_prefix().'custome_form';
+		$edit_short_code = $wpdb->get_results("SELECT * FROM $table_name WHERE id ='".$_POST['short_code_id']."'",ARRAY_A)[0];
+		echo "<pre>";
+		print_r($edit_short_code);
+		
 	}
 	public function credentials(){
 		unset($_POST['action']);
@@ -94,6 +104,8 @@ class DropboxUpload{
 		 }
 
 	}
+
+
 	public function recursiveScan($dir,$option){
 		global $wpdb;
 		$table_name = $this->db_prefix().'dropbox_details';
@@ -117,12 +129,18 @@ class DropboxUpload{
 	}
 	public function menu(){
 		add_menu_page('Dropbox Page','Dropbox Upload','manage_options','dropbox_view');
-		add_submenu_page('dropbox_view','File Upload','Dropbox Menu','manage_options','dropbox_view',array($this,'dropbox_view'));
-		add_submenu_page('dropbox_view','Create Form','Add New Form','manage_options','create-form',array($this,'custome_form'));
+		add_submenu_page('dropbox_view','File Upload','Dropbox Upload','manage_options','dropbox_view',array($this,'dropbox_view'));
+		add_submenu_page('dropbox_view','Create Form','Add Shot Code','manage_options','create-form',array($this,'custome_form'));
+		add_submenu_page('dropbox_view','List Shot Code','List Shot Code','manage_options','list-shot-code',array($this,'list_shot_code'));
+
 	}
 	public function custome_form(){
 		include PLUGIN_DIR_PATH.'view/custome_form.php';
 	}
+	public function list_shot_code(){
+		include PLUGIN_DIR_PATH.'view/list_shot_code.php';
+	}
+
 	public function dropbox_view(){
 		include PLUGIN_DIR_PATH.'view/upload.php';
 	}
